@@ -1,6 +1,7 @@
-﻿import "./globals.css";
+import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { CursorSpotlight } from "@/components/cursor-spotlight";
 
 const uiFont = Inter({
   subsets: ["latin"],
@@ -21,7 +22,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={uiFont.variable}>{children}</body>
+      <body className={uiFont.variable}>
+        <CursorSpotlight />
+        <div className="cursor-spotlight-layer" aria-hidden />
+        <div className="app-shell">{children}</div>
+      </body>
     </html>
   );
 }
