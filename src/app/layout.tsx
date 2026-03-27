@@ -1,9 +1,17 @@
-import "./globals.css";
+﻿import "./globals.css";
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+
+const uiFont = Inter({
+  subsets: ["latin"],
+  variable: "--font-ui",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: "Career Path AI",
-  description: "Seu próximo passo para uma carreira internacional",
+  title: "AI CAREER SYSTEM",
+  description:
+    "Descubra carreiras, países e um plano de estudos realista com base no seu perfil.",
 };
 
 export default function RootLayout({
@@ -13,7 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className="min-h-screen">{children}</body>
+      <body className={uiFont.variable}>{children}</body>
     </html>
   );
 }
