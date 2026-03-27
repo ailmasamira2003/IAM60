@@ -210,7 +210,7 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
   }, [canAdvance, goNext, isLastQuestion, isSubmitting, result, started, submit]);
 
   if (result) {
-    return <ResultScreen values={values} result={result} onRestart={handleReset} />;
+    return <ResultScreen values={values} result={result} />;
   }
 
   if (!started) {

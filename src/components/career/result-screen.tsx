@@ -1,89 +1,48 @@
 ﻿"use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
-import {
-  Cell,
-  Legend,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
-import { buildMockChatReply } from "@/services/career-result-service";
 import { exportCareerResultPdf } from "@/services/pdf-service";
-import { useCareerStore } from "@/store/career-store";
 import type { CareerFormValues, CareerResult } from "@/types/career";
 
 interface ResultScreenProps {
   values: CareerFormValues;
   result: CareerResult;
-  onRestart: () => void;
 }
 
-export function ResultScreen({ values, result, onRestart }: ResultScreenProps) {
-  const { chatMessages, addChatMessage, clearChat } = useCareerStore();
+function getReadinessLevelLabel(level: number): string {
+  if (level >= 80) {
+    return "Alta";
+  }
 
-  const [input, setInput] = useState("");
+  if (level >= 60) {
+    return "Boa";
+  }
 
-  useEffect(() => {
-    if (chatMessages.length > 0) {
-      return;
-    }
+  if (level >= 45) {
+    return "Moderada";
+  }
 
-    addChatMessage({
-      role: "assistant",
-      text: `Análise concluída. Seu foco inicial deve ser ${result.suggestedCareers[0]} e preparação para ${result.recommendedCountries[0]}.`,
-    });
-  }, [
-    addChatMessage,
-    chatMessages.length,
-    result.recommendedCountries,
-    result.suggestedCareers,
-  ]);
+  return "Inicial";
+}
 
-  const whatsappLink = useMemo(() => {
-    const message = [
-      "Recebi meu plano de carreira internacional no AI CAREER SYSTEM.",
-      `Objetivo: ${values.mainGoal}`,
-      `Prontidão atual: ${result.readinessLevel}%`,
-      `Países recomendados: ${result.recommendedCountries.join(", ")}`,
-      `Carreira em destaque: ${result.suggestedCareers[0]}`,
-    ].join("\n");
+function getReadinessMessage(level: number): string {
+  if (level >= 80) {
+    return "Você já tem uma base sólida para avançar com consistência no plano internacional.";
+  }
 
-    return `https://wa.me/?text=${encodeURIComponent(message)}`;
-  }, [
-    result.readinessLevel,
-    result.recommendedCountries,
-    result.suggestedCareers,
-    values.mainGoal,
-  ]);
+  if (level >= 60) {
+    return "Seu cenário é positivo, com alguns ajustes pontuais para acelerar resultados.";
+  }
 
-  function handleExportPdf() {
+  if (level >= 45) {
+    return "Existe potencial real, mas vale fortalecer rotina, idioma e execução nas próximas semanas.";
+  }
+
+  return "Seu começo pede estrutura e foco em fundamentos antes de acelerar candidaturas.";
+}
+
+export function ResultScreen({ values, result }: ResultScreenProps) {
+  function handleBuyPdfReport(): void {
     exportCareerResultPdf(values, result);
-  }
-
-  function handleSubmitChat(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const trimmed = input.trim();
-
-    if (!trimmed) {
-      return;
-    }
-
-    addChatMessage({ role: "user", text: trimmed });
-    setInput("");
-
-    window.setTimeout(() => {
-      addChatMessage({
-        role: "assistant",
-        text: buildMockChatReply(trimmed, result),
-      });
-    }, 300);
-  }
-
-  function handleRestart() {
-    clearChat();
-    onRestart();
   }
 
   return (
@@ -93,70 +52,17 @@ export function ResultScreen({ values, result, onRestart }: ResultScreenProps) {
         <p>{result.summary}</p>
       </div>
 
-      <div className="result-grid">
-        <article className="result-card chart-card">
-          <h3>Perfil de decisão</h3>
-          <p className="result-card-note">
-            Este gráfico resume seus padrões de tomada de decisão e destaca os
-            pontos que mais favorecem sua estratégia internacional no curto e no
-            médio prazo.
-          </p>
-          <div className="chart-wrap">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={result.profileChart}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={110}
-                  paddingAngle={2}
-                >
-                  {result.profileChart.map((entry) => (
-                    <Cell key={entry.name} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => `${value}%`} />
-                <Legend verticalAlign="bottom" height={24} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </article>
-
-        <article className="result-card">
-          <h3>Carreiras sugeridas</h3>
+      <div className="result-grid result-grid-compact">
+        <article className="result-card personality-card">
+          <p className="result-kicker">Perfil de personalidade</p>
+          <h3>
+            {result.personalityProfile.title}
+            <span className="profile-code">{result.personalityProfile.code}</span>
+          </h3>
+          <p className="result-card-note">{result.personalityProfile.description}</p>
           <ul>
-            {result.suggestedCareers.map((career) => (
-              <li key={career}>{career}</li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="result-card">
-          <h3>Países recomendados</h3>
-          <ul>
-            {result.recommendedCountries.map((country) => (
-              <li key={country}>{country}</li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="result-card">
-          <h3>Plano de ação</h3>
-          <ol>
-            {result.roadmap.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-        </article>
-
-        <article className="result-card">
-          <h3>Principais lacunas</h3>
-          <ul>
-            {result.topGaps.map((gap) => (
-              <li key={gap}>{gap}</li>
+            {result.personalityProfile.strengths.map((strength) => (
+              <li key={strength}>{strength}</li>
             ))}
           </ul>
         </article>
@@ -171,85 +77,58 @@ export function ResultScreen({ values, result, onRestart }: ResultScreenProps) {
             />
           </div>
           <p>
-            Quanto maior esse indicador, maior a probabilidade de executar seu plano
-            com estabilidade.
+            Classificação: <strong>{getReadinessLevelLabel(result.readinessLevel)}</strong>
           </p>
+          <p>{getReadinessMessage(result.readinessLevel)}</p>
         </article>
 
-        <article className="result-card">
-          <h3>Universidades e programas</h3>
-          <ul>
-            {result.universities.map((item) => (
-              <li key={`${item.university}-${item.program}`}>
-                <strong>{item.university}</strong>
-                <span>
-                  {item.program} | {item.country} | {item.duration}
+        <article className="result-card countries-match-card">
+          <h3>Países que mais combinam com seu estilo</h3>
+          <p className="result-card-note">
+            Compatibilidade estimada com base no seu perfil e na lista de países
+            escolhida por você.
+          </p>
+          <ul className="country-match-list">
+            {result.countryMatches.map((match) => (
+              <li key={match.country}>
+                <span className="country-match-head">
+                  <strong>{match.country}</strong>
+                  <span>{match.compatibility}%</span>
                 </span>
+                <span>{match.reason}</span>
               </li>
             ))}
           </ul>
         </article>
 
-        <article className="result-card">
-          <h3>Bolsas compatíveis</h3>
+        <article className="result-card plus-card">
+          <p className="result-kicker">Plano Plus</p>
+          <h3>O que você desbloqueia na assinatura</h3>
           <ul>
-            {result.scholarships.map((item) => (
-              <li key={item.name}>
-                <strong>{item.name}</strong>
-                <span>
-                  {item.country} | {item.coverage} | {item.fitReason}
-                </span>
-              </li>
-            ))}
+            <li>Plano detalhado de estudos e de carreira</li>
+            <li>Relatório completo</li>
+            <li>IA personalizada</li>
+            <li>Bolsas de estudos e para viagens</li>
           </ul>
-        </article>
-      </div>
-
-      <div className="actions-row">
-        <button type="button" className="primary-btn" onClick={handleExportPdf}>
-          Exportar PDF
-        </button>
-
-        <a
-          className="ghost-btn"
-          href={whatsappLink}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Enviar por WhatsApp
-        </a>
-
-        <button type="button" className="ghost-btn" onClick={handleRestart}>
-          Refazer formulário
-        </button>
-      </div>
-
-      <section className="chat-shell">
-        <h3>Chat com IA (simulado)</h3>
-
-        <div className="chat-messages">
-          {chatMessages.map((message) => (
-            <div
-              key={message.id}
-              className={`chat-bubble ${message.role === "user" ? "from-user" : "from-assistant"}`}
-            >
-              {message.text}
-            </div>
-          ))}
-        </div>
-
-        <form className="chat-form" onSubmit={handleSubmitChat}>
-          <input
-            type="text"
-            placeholder="Exemplo: Quais bolsas combinam mais com meu perfil?"
-            value={input}
-            onChange={(event) => setInput(event.target.value)}
-          />
-          <button type="submit" className="primary-btn">
-            Enviar
+          <p className="plus-price">R$ 49,00/mês</p>
+          <button type="button" className="primary-btn">
+            Inscreva-se
           </button>
-        </form>
-      </section>
+        </article>
+
+        <article className="result-card pdf-card">
+          <p className="result-kicker">Relatório Avulso</p>
+          <h3>Relatório completo em PDF</h3>
+          <p className="result-card-note">
+            Documento completo com análise de perfil, prontidão, compatibilidade de
+            países e respostas do formulário.
+          </p>
+          <p className="plus-price">R$ 15,90</p>
+          <button type="button" className="primary-btn" onClick={handleBuyPdfReport}>
+            Adquira Já!
+          </button>
+        </article>
+      </div>
     </section>
   );
 }

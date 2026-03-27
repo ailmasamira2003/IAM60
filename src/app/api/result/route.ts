@@ -1,11 +1,6 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
-import type {
-  CareerResult,
-  ProfileSlice,
-  ScholarshipOption,
-  UniversityProgram,
-} from "@/types/career";
+import type { CareerResult, CountryMatch, PersonalityProfile } from "@/types/career";
 
 const payloadSchema = z
   .object({
@@ -66,378 +61,418 @@ const payloadSchema = z
     }
   });
 
-const areaCareerMap: Record<string, string[]> = {
-  Tecnologia: [
-    "Engenheiro(a) de Software",
-    "Analista de Dados",
-    "Especialista em Nuvem",
-    "Analista de Cibersegurança",
-  ],
-  Saúde: [
-    "Analista de Saúde Digital",
-    "Assistente de Pesquisa Clínica",
-    "Coordenador(a) de Projetos em Saúde",
-    "Especialista em Dados em Saúde",
-  ],
-  Negócios: [
-    "Analista de Negócios",
-    "Especialista em Marketing de Crescimento",
-    "Estrategista de Operações",
-    "Gerente de Sucesso do Cliente",
-  ],
-  Engenharia: [
-    "Engenheiro(a) de Processos",
-    "Engenheiro(a) de Qualidade",
-    "Especialista em Automação",
-    "Engenheiro(a) de Projetos",
-  ],
-  Artes: [
-    "Designer UX/UI",
-    "Diretor(a) de Arte",
-    "Motion Designer",
-    "Designer de Produto",
-  ],
-  Educação: [
-    "Designer Instrucional",
-    "Especialista em Educação Digital",
-    "Coordenador(a) de Programas Educacionais",
-    "Consultor(a) de Aprendizagem Corporativa",
-  ],
-};
+type MbtiCode =
+  | "ISTJ"
+  | "ISFJ"
+  | "INFJ"
+  | "INTJ"
+  | "ISTP"
+  | "ISFP"
+  | "INFP"
+  | "INTP"
+  | "ESTP"
+  | "ESFP"
+  | "ENFP"
+  | "ENTP"
+  | "ESTJ"
+  | "ESFJ"
+  | "ENFJ"
+  | "ENTJ";
 
-type AreaKey = keyof typeof areaCareerMap;
+type LifestyleAxis =
+  | "innovation"
+  | "stability"
+  | "collaboration"
+  | "balance"
+  | "openness"
+  | "pace";
 
-function inferAreaFromInterest(personalityInterest: string): AreaKey {
-  const map: Record<string, AreaKey> = {
-    Tecnologia: "Tecnologia",
-    "Análise de dados e pesquisa aplicada": "Tecnologia",
-    "Dados, Pesquisa e Investigação": "Tecnologia",
-    "Negócios e Empreendedorismo": "Negócios",
-    Negócios: "Negócios",
-    "Comunicação, Marketing e Mídia": "Negócios",
-    "Direito, Relações Internacionais e Políticas Públicas": "Negócios",
-    "Saúde e Bem-estar": "Saúde",
-    Saúde: "Saúde",
-    "Artes, Design e Criatividade": "Artes",
-    Artes: "Artes",
-    "Educação e Desenvolvimento Humano": "Educação",
-    Educação: "Educação",
-    "Ciências Humanas e Sociais": "Educação",
-    "Ciências Exatas": "Engenharia",
-    "Sustentabilidade, Meio Ambiente e Energia": "Engenharia",
-  };
+type LifestyleVector = Record<LifestyleAxis, number>;
 
-  return map[personalityInterest] ?? "Tecnologia";
+interface PersonalityBlueprint {
+  title: string;
+  description: string;
+  strengths: string[];
+  priorities: LifestyleVector;
 }
 
-const countryGoalMap: Record<string, string[]> = {
-  "Estudar fora": ["Canadá", "Portugal", "Alemanha", "Irlanda", "Reino Unido"],
-  "Trabalhar fora": ["Alemanha", "Canadá", "Austrália", "Holanda", "Irlanda"],
-  Imigrar: ["Canadá", "Portugal", "Austrália", "Nova Zelândia", "Alemanha"],
-};
-
-type CanonicalGoal = keyof typeof countryGoalMap;
-
-function inferCanonicalGoal(mainGoal: string): CanonicalGoal {
-  const normalized = mainGoal
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-
-  if (
-    normalized.includes("imigr") ||
-    normalized.includes("resid") ||
-    normalized.includes("morar")
-  ) {
-    return "Imigrar";
-  }
-
-  if (
-    normalized.includes("estud") ||
-    normalized.includes("univers") ||
-    normalized.includes("faculd") ||
-    normalized.includes("curso") ||
-    normalized.includes("mestrad") ||
-    normalized.includes("doutor")
-  ) {
-    return "Estudar fora";
-  }
-
-  if (
-    normalized.includes("trabalh") ||
-    normalized.includes("emprego") ||
-    normalized.includes("vaga") ||
-    normalized.includes("carreira")
-  ) {
-    return "Trabalhar fora";
-  }
-
-  return "Estudar fora";
+interface CountryLifestyleProfile extends LifestyleVector {
+  note: string;
 }
 
-const universityPool: UniversityProgram[] = [
-  {
-    university: "University of Toronto",
-    program: "Certificado em Análise de Dados",
-    country: "Canadá",
-    duration: "12 meses",
+const mbtiBlueprints: Record<MbtiCode, PersonalityBlueprint> = {
+  ISTJ: {
+    title: "Planejador(a) Confiável",
+    description:
+      "Você tende a executar com consistência, clareza de processo e foco em resultado de longo prazo.",
+    strengths: ["Disciplina", "Organização", "Compromisso com prazos"],
+    priorities: {
+      innovation: 3,
+      stability: 5,
+      collaboration: 3,
+      balance: 3,
+      openness: 2,
+      pace: 2,
+    },
   },
-  {
-    university: "Seneca College",
-    program: "Gestão Global de Negócios",
-    country: "Canadá",
-    duration: "8 meses",
+  ISFJ: {
+    title: "Cuidador(a) Estruturado(a)",
+    description:
+      "Seu perfil combina confiabilidade com cuidado humano, sendo forte em ambientes previsíveis e colaborativos.",
+    strengths: ["Empatia prática", "Consistência", "Responsabilidade"],
+    priorities: {
+      innovation: 2,
+      stability: 5,
+      collaboration: 5,
+      balance: 4,
+      openness: 3,
+      pace: 2,
+    },
   },
-  {
-    university: "TU Munich",
-    program: "Software Systems M.Sc",
-    country: "Alemanha",
-    duration: "24 meses",
+  INFJ: {
+    title: "Estrategista Humanista",
+    description:
+      "Você pensa no longo prazo com propósito, buscando impacto real e coerência com valores pessoais.",
+    strengths: ["Visão de futuro", "Leitura de contexto", "Propósito"],
+    priorities: {
+      innovation: 4,
+      stability: 3,
+      collaboration: 5,
+      balance: 4,
+      openness: 5,
+      pace: 2,
+    },
   },
-  {
-    university: "RWTH Aachen",
-    program: "Industrial Engineering",
-    country: "Alemanha",
-    duration: "24 meses",
+  INTJ: {
+    title: "Arquiteto(a) Estratégico(a)",
+    description:
+      "Você tende a planejar com autonomia, lógica e foco em ambientes de alta complexidade.",
+    strengths: ["Pensamento sistêmico", "Autonomia", "Foco estratégico"],
+    priorities: {
+      innovation: 5,
+      stability: 4,
+      collaboration: 2,
+      balance: 2,
+      openness: 3,
+      pace: 4,
+    },
   },
-  {
-    university: "University of Melbourne",
-    program: "Professional Engineering",
-    country: "Austrália",
-    duration: "24 meses",
+  ISTP: {
+    title: "Especialista Técnico(a)",
+    description:
+      "Você aprende fazendo, resolve problemas práticos com rapidez e prefere autonomia operacional.",
+    strengths: ["Resolução de problemas", "Objetividade", "Ação prática"],
+    priorities: {
+      innovation: 4,
+      stability: 3,
+      collaboration: 2,
+      balance: 3,
+      openness: 3,
+      pace: 5,
+    },
   },
-  {
-    university: "Universidade de Lisboa",
-    program: "Gestão Internacional",
-    country: "Portugal",
-    duration: "18 meses",
+  ISFP: {
+    title: "Criador(a) Sensível",
+    description:
+      "Seu estilo une criatividade aplicada e sensibilidade humana, com forte busca por sentido no trabalho.",
+    strengths: ["Criatividade", "Empatia", "Flexibilidade"],
+    priorities: {
+      innovation: 3,
+      stability: 3,
+      collaboration: 4,
+      balance: 5,
+      openness: 5,
+      pace: 2,
+    },
   },
-  {
-    university: "University of Porto",
-    program: "Ciência de Dados Aplicada",
-    country: "Portugal",
-    duration: "12 meses",
+  INFP: {
+    title: "Idealista Criativo(a)",
+    description:
+      "Você tende a buscar projetos com significado pessoal, liberdade de criação e impacto positivo.",
+    strengths: ["Imaginação", "Valores claros", "Adaptação criativa"],
+    priorities: {
+      innovation: 4,
+      stability: 2,
+      collaboration: 4,
+      balance: 5,
+      openness: 5,
+      pace: 2,
+    },
   },
-  {
-    university: "Arizona State University",
-    program: "Information Technology",
-    country: "EUA",
-    duration: "18 meses",
+  INTP: {
+    title: "Analista Inventivo(a)",
+    description:
+      "Você gosta de investigar ideias complexas e construir soluções inteligentes com profundidade técnica.",
+    strengths: ["Raciocínio abstrato", "Curiosidade", "Inovação intelectual"],
+    priorities: {
+      innovation: 5,
+      stability: 3,
+      collaboration: 2,
+      balance: 3,
+      openness: 4,
+      pace: 3,
+    },
   },
-  {
-    university: "Northeastern University",
-    program: "Digital Media",
-    country: "EUA",
-    duration: "24 meses",
+  ESTP: {
+    title: "Executor(a) de Alta Energia",
+    description:
+      "Você se destaca em contextos rápidos, com decisão sob pressão e foco em resultados concretos.",
+    strengths: ["Agilidade", "Negociação", "Tomada de decisão"],
+    priorities: {
+      innovation: 4,
+      stability: 2,
+      collaboration: 3,
+      balance: 2,
+      openness: 4,
+      pace: 5,
+    },
   },
-  {
-    university: "University of Sydney",
-    program: "International Business",
-    country: "Austrália",
-    duration: "18 meses",
+  ESFP: {
+    title: "Conector(a) Dinâmico(a)",
+    description:
+      "Seu perfil combina energia social, praticidade e capacidade de criar experiências positivas com pessoas.",
+    strengths: ["Comunicação", "Flexibilidade", "Engajamento social"],
+    priorities: {
+      innovation: 3,
+      stability: 2,
+      collaboration: 5,
+      balance: 4,
+      openness: 5,
+      pace: 4,
+    },
   },
-  {
-    university: "University College Dublin",
-    program: "Data Analytics M.Sc",
-    country: "Irlanda",
-    duration: "12 meses",
+  ENFP: {
+    title: "Catalisador(a) Criativo(a)",
+    description:
+      "Você é orientado(a) a ideias novas, conexões humanas e caminhos de carreira com autonomia e propósito.",
+    strengths: ["Inovação", "Persuasão", "Visão de possibilidades"],
+    priorities: {
+      innovation: 5,
+      stability: 2,
+      collaboration: 4,
+      balance: 4,
+      openness: 5,
+      pace: 4,
+    },
   },
-  {
-    university: "Trinity College Dublin",
-    program: "Digital Marketing Strategy",
-    country: "Irlanda",
-    duration: "12 meses",
+  ENTP: {
+    title: "Inovador(a) Estratégico(a)",
+    description:
+      "Você tende a prosperar em ambientes de mudança, com espaço para testar ideias e construir soluções novas.",
+    strengths: ["Experimentação", "Estratégia", "Adaptabilidade"],
+    priorities: {
+      innovation: 5,
+      stability: 2,
+      collaboration: 3,
+      balance: 3,
+      openness: 5,
+      pace: 5,
+    },
   },
-  {
-    university: "University of Amsterdam",
-    program: "Sustainable Business",
-    country: "Holanda",
-    duration: "12 meses",
+  ESTJ: {
+    title: "Gestor(a) de Execução",
+    description:
+      "Você opera bem em ambientes organizados, com metas claras, estrutura e avanço consistente de carreira.",
+    strengths: ["Liderança prática", "Gestão", "Eficiência"],
+    priorities: {
+      innovation: 3,
+      stability: 5,
+      collaboration: 3,
+      balance: 3,
+      openness: 2,
+      pace: 4,
+    },
   },
-  {
-    university: "TU Delft",
-    program: "Engineering and Technology M.Sc",
-    country: "Holanda",
-    duration: "24 meses",
+  ESFJ: {
+    title: "Coordenador(a) de Pessoas",
+    description:
+      "Seu perfil combina organização com cuidado relacional, favorecendo ambientes colaborativos e seguros.",
+    strengths: ["Trabalho em equipe", "Organização", "Apoio interpessoal"],
+    priorities: {
+      innovation: 2,
+      stability: 4,
+      collaboration: 5,
+      balance: 4,
+      openness: 4,
+      pace: 3,
+    },
   },
-  {
-    university: "King's College London",
-    program: "International Relations",
-    country: "Reino Unido",
-    duration: "12 meses",
+  ENFJ: {
+    title: "Líder Inspirador(a)",
+    description:
+      "Você tende a mobilizar pessoas em torno de objetivos, com empatia, visão e alta comunicação.",
+    strengths: ["Influência positiva", "Liderança humana", "Comunicação"],
+    priorities: {
+      innovation: 4,
+      stability: 3,
+      collaboration: 5,
+      balance: 4,
+      openness: 5,
+      pace: 3,
+    },
   },
-  {
-    university: "University of Manchester",
-    program: "Advanced Engineering",
-    country: "Reino Unido",
-    duration: "24 meses",
+  ENTJ: {
+    title: "Comandante Estratégico(a)",
+    description:
+      "Seu perfil favorece ambientes competitivos, orientados a desempenho, escala e crescimento acelerado.",
+    strengths: ["Visão de negócio", "Decisão", "Foco em performance"],
+    priorities: {
+      innovation: 5,
+      stability: 4,
+      collaboration: 3,
+      balance: 2,
+      openness: 3,
+      pace: 5,
+    },
   },
-  {
-    university: "Sorbonne Université",
-    program: "Applied Data Science",
-    country: "França",
-    duration: "18 meses",
-  },
-  {
-    university: "Universitat de Barcelona",
-    program: "Global Business Management",
-    country: "Espanha",
-    duration: "18 meses",
-  },
-  {
-    university: "University of Auckland",
-    program: "Information Systems",
-    country: "Nova Zelândia",
-    duration: "18 meses",
-  },
-  {
-    university: "University of Otago",
-    program: "Health Sciences",
-    country: "Nova Zelândia",
-    duration: "24 meses",
-  },
-  {
-    university: "ETH Zurich",
-    program: "Data Science M.Sc",
-    country: "Suíça",
-    duration: "24 meses",
-  },
-  {
-    university: "EPFL",
-    program: "Energy Science and Technology",
-    country: "Suíça",
-    duration: "24 meses",
-  },
-  {
-    university: "Tsinghua University",
-    program: "Global Business Journalism",
-    country: "China",
-    duration: "24 meses",
-  },
-  {
-    university: "Peking University",
-    program: "International Relations",
-    country: "China",
-    duration: "24 meses",
-  },
-  {
-    university: "The University of Tokyo",
-    program: "International Program in Economics",
-    country: "Japão",
-    duration: "24 meses",
-  },
-  {
-    university: "Kyoto University",
-    program: "Civil and Environmental Engineering",
-    country: "Japão",
-    duration: "24 meses",
-  },
-  {
-    university: "Seoul National University",
-    program: "Global MBA",
-    country: "Coreia do Sul",
-    duration: "16 meses",
-  },
-  {
-    university: "KAIST",
-    program: "Electrical Engineering",
-    country: "Coreia do Sul",
-    duration: "24 meses",
-  },
-];
+};
 
-const scholarshipPool: ScholarshipOption[] = [
-  {
-    name: "Vanier Canada Graduate Scholarship",
-    country: "Canadá",
-    coverage: "Até CAD 50.000/ano",
-    fitReason: "Excelente para perfis acadêmicos e de pesquisa",
+const countryLifestyleProfiles: Record<string, CountryLifestyleProfile> = {
+  EUA: {
+    innovation: 5,
+    stability: 3,
+    collaboration: 3,
+    balance: 2,
+    openness: 4,
+    pace: 5,
+    note: "Mercado amplo e competitivo, com muitas oportunidades para crescimento rápido.",
   },
-  {
-    name: "DAAD Scholarship",
-    country: "Alemanha",
-    coverage: "Mensalidade + custo de vida",
-    fitReason: "Alta aderência para tecnologia e engenharia",
+  "Canadá": {
+    innovation: 4,
+    stability: 4,
+    collaboration: 5,
+    balance: 4,
+    openness: 5,
+    pace: 3,
+    note: "Combina boa qualidade de vida com ambiente multicultural e boa previsibilidade.",
   },
-  {
-    name: "Australia Awards",
-    country: "Austrália",
-    coverage: "Tuition + passagem + manutenção",
-    fitReason: "Boa opção para trilhas com foco em impacto global",
+  Portugal: {
+    innovation: 3,
+    stability: 3,
+    collaboration: 4,
+    balance: 5,
+    openness: 4,
+    pace: 2,
+    note: "Boa adaptação cultural e ritmo de vida mais equilibrado para transição internacional.",
   },
-  {
-    name: "Santander Universidades",
-    country: "Portugal",
-    coverage: "Auxílio parcial",
-    fitReason: "Porta de entrada acessível para estudos na Europa",
+  Alemanha: {
+    innovation: 5,
+    stability: 5,
+    collaboration: 3,
+    balance: 4,
+    openness: 3,
+    pace: 4,
+    note: "Forte em engenharia e processos, com alto padrão de organização e estabilidade.",
   },
-  {
-    name: "Fulbright Foreign Student",
-    country: "EUA",
-    coverage: "Apoio acadêmico e financeiro",
-    fitReason: "Programa competitivo para perfis de alto desempenho",
+  "Austrália": {
+    innovation: 4,
+    stability: 4,
+    collaboration: 4,
+    balance: 5,
+    openness: 4,
+    pace: 3,
+    note: "Mistura mercado sólido com estilo de vida equilibrado e acolhedor para estrangeiros.",
   },
-  {
-    name: "Chevening Scholarship",
-    country: "Reino Unido",
-    coverage: "Tuition + custo de vida + passagens",
-    fitReason: "Excelente para pós-graduação e desenvolvimento de liderança global",
+  "Reino Unido": {
+    innovation: 4,
+    stability: 4,
+    collaboration: 3,
+    balance: 3,
+    openness: 4,
+    pace: 4,
+    note: "Ecossistema internacional maduro, com forte rede acadêmica e profissional.",
   },
-  {
-    name: "Government of Ireland International Education Scholarship",
-    country: "Irlanda",
-    coverage: "Bolsa + auxílio financeiro",
-    fitReason: "Boa porta de entrada para cursos estratégicos em universidades irlandesas",
+  Irlanda: {
+    innovation: 4,
+    stability: 4,
+    collaboration: 4,
+    balance: 4,
+    openness: 4,
+    pace: 3,
+    note: "Ambiente em crescimento para tecnologia e negócios, com boa integração internacional.",
   },
-  {
-    name: "Holland Scholarship",
-    country: "Holanda",
-    coverage: "Auxílio parcial para tuition",
-    fitReason: "Aderente para estudantes internacionais em programas de graduação e pós",
+  Holanda: {
+    innovation: 4,
+    stability: 4,
+    collaboration: 5,
+    balance: 5,
+    openness: 5,
+    pace: 3,
+    note: "Perfil moderno e internacional, com forte equilíbrio entre carreira e vida pessoal.",
   },
-  {
-    name: "Eiffel Excellence Scholarship",
-    country: "França",
-    coverage: "Auxílio mensal + benefícios acadêmicos",
-    fitReason: "Forte opção para mestrado e doutorado em áreas de alta demanda",
+  "França": {
+    innovation: 4,
+    stability: 3,
+    collaboration: 4,
+    balance: 4,
+    openness: 4,
+    pace: 3,
+    note: "Combina tradição acadêmica e criativa com bons polos de inovação.",
   },
-  {
-    name: "Becas MAEC-AECID",
-    country: "Espanha",
-    coverage: "Apoio acadêmico e financeiro parcial",
-    fitReason: "Oportunidade relevante para formação internacional em instituições espanholas",
+  Espanha: {
+    innovation: 3,
+    stability: 3,
+    collaboration: 4,
+    balance: 5,
+    openness: 4,
+    pace: 2,
+    note: "Ritmo de vida mais humano, com boa qualidade relacional e adaptação social.",
   },
-  {
-    name: "Manaaki New Zealand Scholarships",
-    country: "Nova Zelândia",
-    coverage: "Tuition + manutenção + passagens",
-    fitReason: "Ótima alternativa para trilhas acadêmicas com foco em impacto e inovação",
+  "Nova Zelândia": {
+    innovation: 3,
+    stability: 4,
+    collaboration: 5,
+    balance: 5,
+    openness: 5,
+    pace: 2,
+    note: "Estilo de vida estável e equilibrado, ideal para quem prioriza bem-estar no longo prazo.",
   },
-  {
-    name: "Swiss Government Excellence Scholarships",
-    country: "Suíça",
-    coverage: "Bolsa mensal + apoio acadêmico",
-    fitReason: "Muito relevante para pós-graduação e pesquisa em universidades suíças",
+  "Suíça": {
+    innovation: 5,
+    stability: 5,
+    collaboration: 3,
+    balance: 4,
+    openness: 3,
+    pace: 3,
+    note: "Altíssima estabilidade e excelência acadêmica/profissional, com forte foco em precisão.",
   },
-  {
-    name: "Chinese Government Scholarship (CSC)",
-    country: "China",
-    coverage: "Tuition + acomodação + auxílio mensal",
-    fitReason: "Excelente opção para cursos em inglês e mandarim com apoio governamental",
+  China: {
+    innovation: 5,
+    stability: 3,
+    collaboration: 3,
+    balance: 2,
+    openness: 2,
+    pace: 5,
+    note: "Ambiente de alta escala e velocidade, com forte avanço em tecnologia e pesquisa aplicada.",
   },
-  {
-    name: "MEXT Scholarship",
-    country: "Japão",
-    coverage: "Tuition + auxílio mensal + passagens",
-    fitReason: "Programa sólido para graduação e pós em instituições japonesas",
+  Japão: {
+    innovation: 5,
+    stability: 5,
+    collaboration: 3,
+    balance: 3,
+    openness: 2,
+    pace: 4,
+    note: "Mercado avançado e disciplinado, valorizando consistência técnica e qualidade.",
   },
-  {
-    name: "Global Korea Scholarship (GKS)",
-    country: "Coreia do Sul",
-    coverage: "Tuition + manutenção + curso de idioma",
-    fitReason: "Alta aderência para quem busca formação internacional na Coreia do Sul",
+  "Coreia do Sul": {
+    innovation: 5,
+    stability: 4,
+    collaboration: 3,
+    balance: 2,
+    openness: 3,
+    pace: 5,
+    note: "Economia dinâmica e tecnológica, com alto ritmo e foco em inovação aplicada.",
   },
-];
+};
+
+const lifestyleAxisLabels: Record<LifestyleAxis, string> = {
+  innovation: "inovação e oportunidades de crescimento",
+  stability: "estabilidade e previsibilidade de carreira",
+  collaboration: "colaboração e suporte social",
+  balance: "equilíbrio entre trabalho e vida pessoal",
+  openness: "abertura cultural para integração internacional",
+  pace: "dinamismo do mercado de trabalho",
+};
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -452,6 +487,265 @@ function getStudyHoursAsNumber(studyHoursPerDay: string): number {
   };
 
   return map[studyHoursPerDay] ?? 1;
+}
+
+function normalizeText(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function inferMbtiCode(payload: z.infer<typeof payloadSchema>): MbtiCode {
+  let extroversion = 0;
+  let introversion = 0;
+  let sensing = 0;
+  let intuition = 0;
+  let thinking = 0;
+  let feeling = 0;
+  let judging = 0;
+  let perceiving = 0;
+
+  const style = normalizeText(payload.personalityStyle);
+  const preference = normalizeText(payload.personalityPreference);
+  const learning = normalizeText(payload.learningFormat);
+  const interest = normalizeText(payload.personalityInterest);
+
+  if (style.includes("comunic")) {
+    extroversion += 2;
+    feeling += 1;
+  }
+  if (style.includes("analit")) {
+    introversion += 1;
+    thinking += 2;
+  }
+  if (style.includes("pratic")) {
+    sensing += 2;
+    judging += 1;
+  }
+  if (style.includes("criativ")) {
+    intuition += 2;
+    perceiving += 1;
+  }
+
+  if (
+    preference.includes("pessoas") ||
+    preference.includes("empatia") ||
+    preference.includes("comunicacao") ||
+    preference.includes("suporte")
+  ) {
+    extroversion += 2;
+    feeling += 2;
+  }
+
+  if (
+    preference.includes("estrategia") ||
+    preference.includes("logica") ||
+    preference.includes("sistemas") ||
+    preference.includes("dados")
+  ) {
+    introversion += 1;
+    intuition += 1;
+    thinking += 2;
+  }
+
+  if (preference.includes("organizacao") || preference.includes("processos")) {
+    sensing += 1;
+    thinking += 1;
+    judging += 2;
+  }
+
+  if (preference.includes("acao pratica") || preference.includes("operacoes")) {
+    sensing += 2;
+    perceiving += 2;
+  }
+
+  if (preference.includes("criacao") || preference.includes("inovacao")) {
+    intuition += 2;
+    perceiving += 1;
+  }
+
+  if (
+    learning.includes("revisao") ||
+    learning.includes("perguntas") ||
+    learning.includes("blocos")
+  ) {
+    sensing += 1;
+    thinking += 1;
+    judging += 1;
+  }
+
+  if (learning.includes("alternando")) {
+    intuition += 2;
+    perceiving += 1;
+  }
+
+  if (learning.includes("explicando") || learning.includes("proprias palavras")) {
+    extroversion += 1;
+    feeling += 1;
+    intuition += 1;
+  }
+
+  if (
+    learning.includes("projetos") ||
+    learning.includes("exercicios praticos") ||
+    learning.includes("praticando")
+  ) {
+    sensing += 2;
+    perceiving += 1;
+  }
+
+  if (
+    interest.includes("tecnologia") ||
+    interest.includes("dados") ||
+    interest.includes("exatas") ||
+    interest.includes("engenharia")
+  ) {
+    intuition += 1;
+    thinking += 2;
+  }
+
+  if (
+    interest.includes("saude") ||
+    interest.includes("educacao") ||
+    interest.includes("humanas")
+  ) {
+    sensing += 1;
+    feeling += 2;
+  }
+
+  if (
+    interest.includes("negocios") ||
+    interest.includes("empreendedorismo") ||
+    interest.includes("direito") ||
+    interest.includes("politicas publicas")
+  ) {
+    extroversion += 1;
+    thinking += 1;
+    judging += 1;
+  }
+
+  if (interest.includes("artes") || interest.includes("comunicacao")) {
+    extroversion += 1;
+    intuition += 2;
+    feeling += 1;
+  }
+
+  if (interest.includes("sustentabilidade") || interest.includes("meio ambiente")) {
+    intuition += 1;
+    sensing += 1;
+    feeling += 1;
+  }
+
+  if (payload.studyAvailability === "Todos os dias") {
+    judging += 2;
+  }
+  if (payload.studyAvailability === "Apenas finais de semana") {
+    perceiving += 1;
+  }
+  if (payload.routineDuration === "3+ meses") {
+    judging += 2;
+  }
+  if (payload.routineDuration === "1 semana") {
+    perceiving += 1;
+  }
+  if (payload.mainChallenge === "Falta de foco") {
+    perceiving += 1;
+  }
+
+  const energy =
+    extroversion === introversion
+      ? style.includes("comunic")
+        ? "E"
+        : "I"
+      : extroversion > introversion
+        ? "E"
+        : "I";
+
+  const information =
+    sensing === intuition
+      ? style.includes("criativ")
+        ? "N"
+        : "S"
+      : sensing > intuition
+        ? "S"
+        : "N";
+
+  const decision =
+    thinking === feeling
+      ? style.includes("analit")
+        ? "T"
+        : "F"
+      : thinking > feeling
+        ? "T"
+        : "F";
+
+  const structure =
+    judging === perceiving
+      ? style.includes("pratic")
+        ? "J"
+        : "P"
+      : judging > perceiving
+        ? "J"
+        : "P";
+
+  return `${energy}${information}${decision}${structure}` as MbtiCode;
+}
+
+function buildPersonalityProfile(code: MbtiCode): PersonalityProfile {
+  const blueprint = mbtiBlueprints[code];
+
+  return {
+    code,
+    title: blueprint.title,
+    description: blueprint.description,
+    strengths: blueprint.strengths,
+  };
+}
+
+function buildCountryMatches(
+  selectedCountries: string[],
+  profileCode: MbtiCode
+): CountryMatch[] {
+  const blueprint = mbtiBlueprints[profileCode];
+  const axes = Object.keys(lifestyleAxisLabels) as LifestyleAxis[];
+
+  const matches = selectedCountries
+    .filter((country) => countryLifestyleProfiles[country])
+    .map((country) => {
+      const countryProfile = countryLifestyleProfiles[country];
+      const weighted = axes.map((axis) => ({
+        axis,
+        score: countryProfile[axis] * blueprint.priorities[axis],
+      }));
+      const rawScore = weighted.reduce((sum, item) => sum + item.score, 0);
+      const compatibility = Math.round((rawScore / 150) * 100);
+      const topSignals = weighted
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 2)
+        .map((item) => lifestyleAxisLabels[item.axis]);
+
+      return {
+        country,
+        compatibility,
+        reason: `${countryProfile.note} Destaque para ${topSignals[0]} e ${topSignals[1]}.`,
+      };
+    })
+    .sort((a, b) => b.compatibility - a.compatibility)
+    .slice(0, 4);
+
+  if (matches.length > 0) {
+    return matches;
+  }
+
+  return [
+    {
+      country: "Canadá",
+      compatibility: 70,
+      reason:
+        "País com boa combinação entre qualidade de vida, oportunidades e integração internacional.",
+    },
+  ];
 }
 
 function scoreReadiness(payload: z.infer<typeof payloadSchema>): number {
@@ -501,298 +795,6 @@ function scoreReadiness(payload: z.infer<typeof payloadSchema>): number {
   return clamp(total, 35, 95);
 }
 
-function buildProfileChart(payload: z.infer<typeof payloadSchema>): ProfileSlice[] {
-  let creative = 24;
-  let analytical = 24;
-  let practical = 24;
-  let communicative = 24;
-
-  if (payload.personalityStyle === "Criativo") {
-    creative += 16;
-  }
-  if (payload.personalityStyle === "Analítico") {
-    analytical += 16;
-  }
-  if (payload.personalityStyle === "Prático") {
-    practical += 16;
-  }
-  if (payload.personalityStyle === "Comunicativo") {
-    communicative += 16;
-  }
-
-  const personalityPreferenceBoosts: Record<
-    string,
-    Partial<{
-      creative: number;
-      analytical: number;
-      practical: number;
-      communicative: number;
-    }>
-  > = {
-    // Legacy options
-    "Trabalhar com pessoas": { communicative: 12 },
-    "Analisar dados": { analytical: 12 },
-    "Criar coisas novas": { creative: 12 },
-    "Resolver problemas": { practical: 12 },
-    // New work-style options
-    "Estratégia, lógica e sistemas complexos": { analytical: 11, creative: 3 },
-    "Pessoas, empatia e desenvolvimento humano": {
-      communicative: 10,
-      creative: 4,
-    },
-    "Organização, processos e execução com estabilidade": {
-      practical: 9,
-      analytical: 4,
-    },
-    "Ação prática, operações dinâmicas e resposta rápida": {
-      practical: 11,
-      creative: 3,
-    },
-    "Pesquisa, dados e investigação técnica": { analytical: 12 },
-    "Comunicação, influência e mediação": { communicative: 12 },
-    "Criação e inovação de produtos/soluções": { creative: 12 },
-    "Suporte, serviço e atendimento com impacto real": {
-      communicative: 8,
-      practical: 4,
-    },
-  };
-
-  const normalizedPreference = payload.personalityPreference
-    .replace(/\s+\([A-Z]{2}\)$/u, "")
-    .trim();
-  const preferenceBoost = personalityPreferenceBoosts[normalizedPreference];
-  if (preferenceBoost) {
-    creative += preferenceBoost.creative ?? 0;
-    analytical += preferenceBoost.analytical ?? 0;
-    practical += preferenceBoost.practical ?? 0;
-    communicative += preferenceBoost.communicative ?? 0;
-  }
-
-  const learningFormatBoosts: Record<
-    string,
-    Partial<{
-      creative: number;
-      analytical: number;
-      practical: number;
-      communicative: number;
-    }>
-  > = {
-    // Legacy options
-    Praticando: { practical: 10 },
-    Assistindo: { communicative: 7 },
-    Lendo: { analytical: 10 },
-    "Testando sozinho": { creative: 6, practical: 8 },
-    // New evidence-based options
-    "Fazendo testes rápidos e flashcards": { analytical: 8, practical: 5 },
-    "Respondendo perguntas de revisão sobre o conteúdo": {
-      analytical: 8,
-      practical: 5,
-    },
-    "Revisando em sessões curtas ao longo da semana": {
-      analytical: 7,
-      practical: 4,
-    },
-    "Revisando o conteúdo em pequenos blocos durante a semana": {
-      analytical: 7,
-      practical: 4,
-    },
-    "Intercalando temas e tipos de exercício": { analytical: 8, creative: 4 },
-    "Alternando entre assuntos diferentes no mesmo estudo": {
-      analytical: 8,
-      creative: 4,
-    },
-    "Explicando com minhas palavras e exemplos": {
-      communicative: 7,
-      analytical: 5,
-    },
-    "Explicando a matéria com minhas próprias palavras": {
-      communicative: 7,
-      analytical: 5,
-    },
-    "Praticando em exercícios e projetos reais": { practical: 10, creative: 4 },
-    "Aprendendo com exercícios práticos e projetos": {
-      practical: 10,
-      creative: 4,
-    },
-  };
-
-  const learningBoost = learningFormatBoosts[payload.learningFormat];
-  if (learningBoost) {
-    creative += learningBoost.creative ?? 0;
-    analytical += learningBoost.analytical ?? 0;
-    practical += learningBoost.practical ?? 0;
-    communicative += learningBoost.communicative ?? 0;
-  }
-
-  const personalityInterestBoosts: Record<
-    string,
-    Partial<{
-      creative: number;
-      analytical: number;
-      practical: number;
-      communicative: number;
-    }>
-  > = {
-    // Legacy options
-    Tecnologia: { analytical: 7, practical: 5 },
-    Negócios: { communicative: 7, analytical: 4 },
-    Saúde: { practical: 8, communicative: 4 },
-    Artes: { creative: 10 },
-    Educação: { communicative: 8 },
-    // New expanded options
-    "Negócios e Empreendedorismo": { communicative: 7, analytical: 5 },
-    "Saúde e Bem-estar": { practical: 8, communicative: 5 },
-    "Artes, Design e Criatividade": { creative: 10, communicative: 2 },
-    "Educação e Desenvolvimento Humano": { communicative: 8, analytical: 2 },
-    "Ciências Exatas": { analytical: 10, practical: 3 },
-    "Ciências Humanas e Sociais": { analytical: 5, communicative: 6 },
-    "Comunicação, Marketing e Mídia": { communicative: 10, creative: 4 },
-    "Direito, Relações Internacionais e Políticas Públicas": {
-      analytical: 6,
-      communicative: 7,
-    },
-    "Sustentabilidade, Meio Ambiente e Energia": {
-      analytical: 6,
-      practical: 6,
-      creative: 3,
-    },
-    "Dados, Pesquisa e Investigação": { analytical: 11, practical: 4 },
-  };
-
-  const interestBoost = personalityInterestBoosts[payload.personalityInterest];
-  if (interestBoost) {
-    creative += interestBoost.creative ?? 0;
-    analytical += interestBoost.analytical ?? 0;
-    practical += interestBoost.practical ?? 0;
-    communicative += interestBoost.communicative ?? 0;
-  }
-
-  return [
-    { name: "Criativo", value: clamp(creative, 10, 60), color: "#d946ef" },
-    { name: "Analítico", value: clamp(analytical, 10, 60), color: "#38bdf8" },
-    { name: "Prático", value: clamp(practical, 10, 60), color: "#22c55e" },
-    { name: "Comunicativo", value: clamp(communicative, 10, 60), color: "#f59e0b" },
-  ];
-}
-
-function normalizeToHundred(slices: ProfileSlice[]): ProfileSlice[] {
-  const total = slices.reduce((sum, item) => sum + item.value, 0);
-
-  return slices.map((slice, index) => {
-    if (index < slices.length - 1) {
-      return {
-        ...slice,
-        value: Math.round((slice.value / total) * 100),
-      };
-    }
-
-    const partial = slices
-      .slice(0, -1)
-      .reduce((sum, item) => sum + Math.round((item.value / total) * 100), 0);
-
-    return {
-      ...slice,
-      value: 100 - partial,
-    };
-  });
-}
-
-function pickCountries(payload: z.infer<typeof payloadSchema>): string[] {
-  const canonicalGoal = inferCanonicalGoal(payload.mainGoal);
-  const fallback = countryGoalMap[canonicalGoal] ?? countryGoalMap["Estudar fora"];
-  const merged = [...payload.preferredCountries, ...fallback];
-
-  return Array.from(new Set(merged)).slice(0, 3);
-}
-
-function pickCareers(payload: z.infer<typeof payloadSchema>): string[] {
-  const inferredArea = inferAreaFromInterest(payload.personalityInterest);
-  const fromArea = areaCareerMap[inferredArea] ?? areaCareerMap.Tecnologia;
-  const canonicalGoal = inferCanonicalGoal(payload.mainGoal);
-
-  if (canonicalGoal === "Imigrar") {
-    return [
-      fromArea[0],
-      "Especialista em Adaptação Internacional",
-      fromArea[1],
-      fromArea[2],
-    ];
-  }
-
-  if (canonicalGoal === "Estudar fora") {
-    return [
-      "Assistente de Pesquisa",
-      fromArea[0],
-      fromArea[1],
-      "Analista de Projetos Acadêmicos",
-    ];
-  }
-
-  return fromArea.slice(0, 4);
-}
-
-function buildRoadmap(payload: z.infer<typeof payloadSchema>): string[] {
-  const pace =
-    payload.studyHoursPerDay === "3h" || payload.studyHoursPerDay === "4h+"
-      ? "acelerado"
-      : "gradual";
-  const inferredArea = inferAreaFromInterest(payload.personalityInterest);
-
-  const professionFocus = payload.targetProfession.trim()
-    ? ` com foco em ${payload.targetProfession.trim()}`
-    : "";
-
-  return [
-    `Semana 1: organizar rotina ${pace}, meta de inglês e trilha inicial em ${inferredArea}${professionFocus}.`,
-    "Semana 2: desenvolver base prática com exercícios e projetos de portfólio.",
-    "Semana 3: preparar currículo internacional, LinkedIn e carta de apresentação.",
-    "Semana 4: mapear universidades/programas e bolsas compatíveis com o perfil.",
-    "Semana 5 em diante: candidaturas, networking estratégico e simulação de entrevistas.",
-  ];
-}
-
-function buildGaps(payload: z.infer<typeof payloadSchema>): string[] {
-  const gaps: string[] = [];
-
-  if (payload.englishLevel === "Básico") {
-    gaps.push("Nível de inglês ainda limitado para candidaturas internacionais imediatas.");
-  }
-
-  if (payload.studyHoursPerDay === "1h") {
-    gaps.push("Carga de estudo diária baixa para objetivos de curto prazo.");
-  }
-
-  if (payload.routineDuration === "1 semana") {
-    gaps.push("Baixa previsibilidade de rotina para sustentar evolução contínua.");
-  }
-
-  if (payload.mainChallenge === "Falta de foco") {
-    gaps.push("Falta de foco recorrente pode interromper a execução do plano.");
-  }
-
-  if (payload.mainChallenge === "Não sei por onde começar") {
-    gaps.push("Necessidade de clareza inicial de trilha e priorização das próximas ações.");
-  }
-
-  if (payload.mainChallenge === "Falta de tempo") {
-    gaps.push("Agenda apertada exige microblocos de estudo e maior disciplina semanal.");
-  }
-
-  if (payload.mainChallenge === "Falta de dinheiro") {
-    gaps.push("Pressão financeira exige foco em bolsas e programas de menor custo.");
-  }
-
-  if (payload.financialCondition === "Preciso de bolsa 100%") {
-    gaps.push("Dependência de bolsa integral requer calendário de candidatura rigoroso.");
-  }
-
-  if (gaps.length === 0) {
-    gaps.push("Continuar evoluindo inglês profissional e fortalecer portfólio internacional.");
-  }
-
-  return gaps.slice(0, 3);
-}
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -810,38 +812,15 @@ export async function POST(req: Request) {
 
     const payload = parsed.data;
     const readinessLevel = scoreReadiness(payload);
-    const recommendedCountries = pickCountries(payload);
-    const suggestedCareers = pickCareers(payload);
-    const profileChart = normalizeToHundred(buildProfileChart(payload));
-
-    const universities = universityPool
-      .filter((item) => recommendedCountries.includes(item.country))
-      .slice(0, 4);
-
-    const scholarships = scholarshipPool
-      .filter((item) => recommendedCountries.includes(item.country))
-      .slice(0, 4);
-
-    const professionFocus = payload.targetProfession.trim()
-      ? `, com interesse direto em ${payload.targetProfession.trim()}`
-      : "";
-    const inferredArea = inferAreaFromInterest(payload.personalityInterest);
-    const mainGoalText = payload.mainGoal.trim();
-    const mainGoalPreview =
-      mainGoalText.length > 140
-        ? `${mainGoalText.slice(0, 137)}...`
-        : mainGoalText;
+    const personalityCode = inferMbtiCode(payload);
+    const personalityProfile = buildPersonalityProfile(personalityCode);
+    const countryMatches = buildCountryMatches(payload.preferredCountries, personalityCode);
 
     const result: CareerResult = {
-      summary: `Seu perfil indica bom potencial para carreira internacional em ${inferredArea}${professionFocus}. Com foco em "${mainGoalPreview}", o plano foi estruturado para sua disponibilidade (${payload.studyAvailability.toLowerCase()}) e rotina estimada de ${payload.routineDuration.toLowerCase()}.`,
-      profileChart,
-      suggestedCareers,
-      recommendedCountries,
-      universities,
-      scholarships,
-      roadmap: buildRoadmap(payload),
+      summary: `Seu perfil de personalidade aponta para ${personalityProfile.title} (${personalityProfile.code}).`,
+      personalityProfile,
+      countryMatches,
       readinessLevel,
-      topGaps: buildGaps(payload),
     };
 
     return NextResponse.json({ result });
@@ -851,7 +830,7 @@ export async function POST(req: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "Erro interno ao montar resultado simulado.",
+            : "Erro interno ao montar resultado.",
       },
       { status: 500 }
     );

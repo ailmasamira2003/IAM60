@@ -56,40 +56,22 @@ export interface CareerQuestion {
   max?: number;
 }
 
-export interface ProfileSlice {
-  name: string;
-  value: number;
-  color: string;
+export interface PersonalityProfile {
+  code: string;
+  title: string;
+  description: string;
+  strengths: string[];
 }
 
-export interface UniversityProgram {
-  university: string;
-  program: string;
+export interface CountryMatch {
   country: string;
-  duration: string;
-}
-
-export interface ScholarshipOption {
-  name: string;
-  country: string;
-  coverage: string;
-  fitReason: string;
+  compatibility: number;
+  reason: string;
 }
 
 export interface CareerResult {
   summary: string;
-  profileChart: ProfileSlice[];
-  suggestedCareers: string[];
-  recommendedCountries: string[];
-  universities: UniversityProgram[];
-  scholarships: ScholarshipOption[];
-  roadmap: string[];
+  personalityProfile: PersonalityProfile;
+  countryMatches: CountryMatch[];
   readinessLevel: number;
-  topGaps: string[];
-}
-
-export interface ChatMessage {
-  id: string;
-  role: "assistant" | "user";
-  text: string;
 }
