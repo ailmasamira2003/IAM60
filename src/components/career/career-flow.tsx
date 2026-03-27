@@ -1,10 +1,10 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  CAREER_QUESTIONS,
   CAREER_STEPS,
   INITIAL_FORM_VALUES,
+  getVisibleCareerQuestions,
   isArrayField,
   isQuestionAnswered,
 } from "@/data/career-questionnaire";
@@ -30,18 +30,24 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
   const [result, setResult] = useState<CareerResult | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
 
-  const currentQuestion: CareerQuestion = CAREER_QUESTIONS[currentQuestionIndex];
-  const totalQuestions = CAREER_QUESTIONS.length;
   const steps = CAREER_STEPS;
+  const questions = useMemo(() => getVisibleCareerQuestions(values), [values]);
+  const totalQuestions = questions.length;
+  const safeCurrentQuestionIndex = Math.min(currentQuestionIndex, totalQuestions - 1);
+  const currentQuestion: CareerQuestion = questions[safeCurrentQuestionIndex];
+
+  useEffect(() => {
+    setCurrentQuestionIndex((previous) => Math.min(previous, totalQuestions - 1));
+  }, [totalQuestions]);
 
   const currentStepIndex = useMemo(
     () => steps.findIndex((step) => step.id === currentQuestion.stepId),
     [currentQuestion.stepId, steps]
   );
   const currentStepTitle = steps[currentStepIndex]?.subtitle ?? "";
-  const progressPercent = ((currentQuestionIndex + 1) / totalQuestions) * 100;
-  const isFirstQuestion = currentQuestionIndex === 0;
-  const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
+  const progressPercent = ((safeCurrentQuestionIndex + 1) / totalQuestions) * 100;
+  const isFirstQuestion = safeCurrentQuestionIndex === 0;
+  const isLastQuestion = safeCurrentQuestionIndex === totalQuestions - 1;
   const canAdvance = isQuestionAnswered(currentQuestion, values);
 
   function handleStart(): void {
@@ -85,6 +91,26 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
       return;
     }
 
+    if (questionId === "currentlyWorking") {
+      setValues((previous) => ({
+        ...previous,
+        currentlyWorking: rawValue,
+        workInGraduationArea:
+          rawValue === "Sim" ? previous.workInGraduationArea : "",
+        currentProfession: rawValue === "Sim" ? previous.currentProfession : "",
+      }));
+      return;
+    }
+
+    if (questionId === "intendsCareerChange") {
+      setValues((previous) => ({
+        ...previous,
+        intendsCareerChange: rawValue,
+        targetProfession: rawValue === "Sim" ? previous.targetProfession : "",
+      }));
+      return;
+    }
+
     setValues((previous) => ({
       ...previous,
       [questionId]: rawValue,
@@ -95,7 +121,7 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
     setCurrentQuestionIndex((previous) => Math.max(previous - 1, 0));
   }
 
-  function goNext(): void {
+  const goNext = useCallback((): void => {
     if (!canAdvance) {
       setErrorMessage("Responda a esta pergunta para continuar.");
       return;
@@ -104,9 +130,9 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
     setCurrentQuestionIndex((previous) =>
       Math.min(previous + 1, totalQuestions - 1)
     );
-  }
+  }, [canAdvance, totalQuestions]);
 
-  async function submit(): Promise<void> {
+  const submit = useCallback(async (): Promise<void> => {
     if (!canAdvance) {
       setErrorMessage("Preencha a resposta para gerar seu resultado.");
       return;
@@ -127,7 +153,61 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
     } finally {
       setIsSubmitting(false);
     }
-  }
+  }, [canAdvance, values]);
+
+  useEffect(() => {
+    if (!started || result) {
+      return;
+    }
+
+    function handleGlobalEnter(event: KeyboardEvent): void {
+      if (event.key !== "Enter" || event.isComposing) {
+        return;
+      }
+
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+
+      if (isSubmitting) {
+        return;
+      }
+
+      const target = event.target;
+
+      if (!(target instanceof HTMLElement)) {
+        return;
+      }
+
+      if (target.tagName === "TEXTAREA") {
+        return;
+      }
+
+      if (target.closest(".flow-actions")) {
+        return;
+      }
+
+      const isChoiceButton = target.classList.contains("choice-btn");
+      if (isChoiceButton && !canAdvance) {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (isLastQuestion) {
+        void submit();
+        return;
+      }
+
+      goNext();
+    }
+
+    window.addEventListener("keydown", handleGlobalEnter);
+
+    return () => {
+      window.removeEventListener("keydown", handleGlobalEnter);
+    };
+  }, [canAdvance, goNext, isLastQuestion, isSubmitting, result, started, submit]);
 
   if (result) {
     return <ResultScreen values={values} result={result} onRestart={handleReset} />;
@@ -157,7 +237,7 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
         steps={steps}
         currentStepIndex={currentStepIndex}
         currentStepTitle={currentStepTitle}
-        currentQuestionIndex={currentQuestionIndex}
+        currentQuestionIndex={safeCurrentQuestionIndex}
         totalQuestions={totalQuestions}
         progressPercent={progressPercent}
       />
@@ -212,4 +292,3 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
     </section>
   );
 }
-

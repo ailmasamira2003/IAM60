@@ -47,13 +47,19 @@ export function QuestionCard({
       <p className="question-helper">{question.helper}</p>
 
       {question.type === "text" ? (
-        <label className="field-wrapper" htmlFor={question.id}>
+        <label
+          className={`field-wrapper ${
+            question.id === "currentProfession" ? "field-wrapper-compact" : ""
+          }`}
+          htmlFor={question.id}
+        >
           <span className="sr-only">Resposta</span>
           <input
             id={question.id}
             className="text-field"
             type="text"
             placeholder={question.placeholder}
+            maxLength={question.maxLength}
             value={normalizedValue as string}
             onChange={(event) => onChange(question.id, event.target.value)}
             disabled={disabled}
@@ -62,12 +68,29 @@ export function QuestionCard({
         </label>
       ) : null}
 
-      {question.type === "number" ? (
+      {question.type === "textarea" ? (
         <label className="field-wrapper" htmlFor={question.id}>
+          <span className="sr-only">Resposta detalhada</span>
+          <textarea
+            id={question.id}
+            className="text-field text-area-field"
+            placeholder={question.placeholder}
+            maxLength={question.maxLength}
+            value={normalizedValue as string}
+            onChange={(event) => onChange(question.id, event.target.value)}
+            disabled={disabled}
+            rows={6}
+            autoFocus
+          />
+        </label>
+      ) : null}
+
+      {question.type === "number" ? (
+        <label className="field-wrapper field-wrapper-number" htmlFor={question.id}>
           <span className="sr-only">Resposta numérica</span>
           <input
             id={question.id}
-            className="text-field"
+            className="text-field text-field-number"
             type="number"
             min={question.min}
             max={question.max}
@@ -75,13 +98,24 @@ export function QuestionCard({
             value={normalizedValue as string}
             onChange={(event) => onChange(question.id, event.target.value)}
             disabled={disabled}
+            inputMode="numeric"
             autoFocus
           />
         </label>
       ) : null}
 
       {question.type === "single-choice" ? (
-        <div className="choice-grid" role="radiogroup" aria-label={question.title}>
+        <div
+          className={`choice-grid ${
+            question.id === "personalityPreference" ||
+            question.id === "learningFormat" ||
+            question.id === "personalityInterest"
+              ? "choice-grid-preference"
+              : ""
+          }`}
+          role="radiogroup"
+          aria-label={question.title}
+        >
           {(question.options ?? []).map((option) =>
             renderOptionButton(
               option,
@@ -110,4 +144,3 @@ export function QuestionCard({
     </section>
   );
 }
-

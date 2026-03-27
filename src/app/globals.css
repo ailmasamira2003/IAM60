@@ -305,6 +305,14 @@ a {
   width: 100%;
 }
 
+.field-wrapper-compact {
+  width: min(460px, 100%);
+}
+
+.field-wrapper-number {
+  width: min(220px, 100%);
+}
+
 .text-field {
   width: 100%;
   border: 1px solid rgba(167, 139, 250, 0.36);
@@ -315,6 +323,23 @@ a {
   font-size: 1.04rem;
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.text-field-number {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.text-field-number::-webkit-outer-spin-button,
+.text-field-number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.text-area-field {
+  min-height: 170px;
+  resize: vertical;
+  line-height: 1.5;
 }
 
 .text-field:focus {
@@ -328,12 +353,17 @@ a {
   gap: 0.65rem;
 }
 
+.choice-grid-preference {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
 .choice-btn {
   border-radius: 12px;
   border: 1px solid rgba(167, 139, 250, 0.28);
   background: rgba(20, 16, 35, 0.74);
   color: #e2dffd;
   padding: 0.74rem 0.84rem;
+  line-height: 1.35;
   transition: all 0.2s ease;
 }
 
@@ -644,5 +674,3 @@ a {
     width: 100%;
   }
 }
-
-

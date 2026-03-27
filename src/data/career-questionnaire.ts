@@ -31,6 +31,9 @@ export const CAREER_STEPS: CareerStep[] = [
 export const INITIAL_FORM_VALUES: CareerFormValues = {
   age: null,
   education: "",
+  currentlyWorking: "",
+  workInGraduationArea: "",
+  currentProfession: "",
   englishLevel: "",
   internationalExperience: "",
   mainGoal: "",
@@ -38,12 +41,11 @@ export const INITIAL_FORM_VALUES: CareerFormValues = {
   personalityPreference: "",
   learningFormat: "",
   personalityInterest: "",
-  workEnvironment: "",
   studyHoursPerDay: "",
   studyAvailability: "",
   mainChallenge: "",
   routineDuration: "",
-  interestArea: "",
+  intendsCareerChange: "",
   targetProfession: "",
   coursePreference: "",
   financialCondition: "",
@@ -58,8 +60,7 @@ export const CAREER_QUESTIONS: CareerQuestion[] = [
     title: "Qual é a sua idade?",
     helper: "Usamos essa informação para calibrar recomendações e prazos.",
     placeholder: "Exemplo: 24",
-    min: 14,
-    max: 70,
+    min: 1,
   },
   {
     id: "education",
@@ -67,7 +68,45 @@ export const CAREER_QUESTIONS: CareerQuestion[] = [
     type: "single-choice",
     title: "Qual é sua escolaridade atual?",
     helper: "Esse ponto ajuda a sugerir caminhos acadêmicos e profissionais viáveis.",
-    options: ["Ensino médio", "Faculdade", "Formado(a)", "Trabalhando"],
+    options: [
+      "Ensino médio incompleto",
+      "Ensino médio completo",
+      "Superior incompleto",
+      "Superior completo",
+      "Pós-graduação incompleta",
+      "Pós-graduação completa",
+      "Ensino técnico completo",
+    ],
+  },
+  {
+    id: "currentlyWorking",
+    stepId: "identification",
+    type: "single-choice",
+    title: "Está trabalhando atualmente?",
+    helper: "Essa informação ajuda a adaptar o ritmo do plano à sua rotina.",
+    options: ["Sim", "Não"],
+  },
+  {
+    id: "workInGraduationArea",
+    stepId: "identification",
+    type: "single-choice",
+    title: "Está atuando na área que se formou?",
+    helper: "Com isso, ajustamos a estratégia para transição ou progressão de carreira.",
+    options: [
+      "Sim, estou",
+      "Não, me formei em outra área",
+      "Trabalho, mas não tenho graduação ou tecnólogo",
+    ],
+  },
+  {
+    id: "currentProfession",
+    stepId: "identification",
+    type: "text",
+    title: "Qual é a sua profissão atualmente?",
+    helper:
+      "Informe apenas o nome da profissão atual. Se estiver em transição, descreva a ocupação principal de hoje.",
+    placeholder: "Exemplo: Especialista em Segurança Digital",
+    maxLength: 80,
   },
   {
     id: "englishLevel",
@@ -88,10 +127,12 @@ export const CAREER_QUESTIONS: CareerQuestion[] = [
   {
     id: "mainGoal",
     stepId: "identification",
-    type: "single-choice",
+    type: "textarea",
     title: "Qual é o seu objetivo principal hoje?",
-    helper: "Vamos priorizar o plano conforme seu objetivo mais importante.",
-    options: ["Estudar fora", "Trabalhar fora", "Imigrar"],
+    helper:
+      "Seja livre para descrever o seu sonho internacional, metas e o que você deseja conquistar.",
+    placeholder:
+      "Exemplo: Quero trabalhar com tecnologia no Canadá em até 2 anos, com um plano realista para estudar inglês e conseguir minha primeira vaga.",
   },
   {
     id: "personalityStyle",
@@ -105,13 +146,17 @@ export const CAREER_QUESTIONS: CareerQuestion[] = [
     id: "personalityPreference",
     stepId: "goals",
     type: "single-choice",
-    title: "Você prefere:",
-    helper: "Essa escolha melhora a aderência das carreiras sugeridas.",
+    title: "Com o que você prefere trabalhar?",
+    helper: "Escolha o tipo de atividade que mais combina com você.",
     options: [
-      "Trabalhar com pessoas",
-      "Analisar dados",
-      "Criar coisas novas",
-      "Resolver problemas",
+      "Estratégia, lógica e sistemas complexos",
+      "Pessoas, empatia e desenvolvimento humano",
+      "Organização, processos e execução com estabilidade",
+      "Ação prática, operações dinâmicas e resposta rápida",
+      "Pesquisa, dados e investigação técnica",
+      "Comunicação, influência e mediação",
+      "Criação e inovação de produtos/soluções",
+      "Suporte, serviço e atendimento com impacto real",
     ],
   },
   {
@@ -119,12 +164,14 @@ export const CAREER_QUESTIONS: CareerQuestion[] = [
     stepId: "goals",
     type: "single-choice",
     title: "Você aprende melhor:",
-    helper: "Com esse dado, o plano propõe uma rotina de estudo mais realista.",
+    helper:
+      "Escolha a estratégia de estudo que mais funciona para você no dia a dia.",
     options: [
-      "Praticando",
-      "Assistindo",
-      "Lendo",
-      "Testando sozinho",
+      "Respondendo perguntas de revisão sobre o conteúdo",
+      "Revisando o conteúdo em pequenos blocos durante a semana",
+      "Alternando entre assuntos diferentes no mesmo estudo",
+      "Explicando a matéria com suas próprias palavras",
+      "Aprendendo com exercícios práticos e projetos",
     ],
   },
   {
@@ -133,15 +180,19 @@ export const CAREER_QUESTIONS: CareerQuestion[] = [
     type: "single-choice",
     title: "Você gosta mais de:",
     helper: "Isso ajuda a destacar frentes com maior motivação no longo prazo.",
-    options: ["Tecnologia", "Negócios", "Saúde", "Artes", "Educação"],
-  },
-  {
-    id: "workEnvironment",
-    stepId: "goals",
-    type: "single-choice",
-    title: "Em qual ambiente você se imagina trabalhando:",
-    helper: "O ambiente ideal influencia o país e o tipo de oportunidade recomendado.",
-    options: ["Remotamente", "Em escritório", "Viajando", "Em campo"],
+    options: [
+      "Tecnologia",
+      "Negócios e Empreendedorismo",
+      "Saúde e Bem-estar",
+      "Artes, Design e Criatividade",
+      "Educação e Desenvolvimento Humano",
+      "Ciências Exatas",
+      "Ciências Humanas e Sociais",
+      "Comunicação, Marketing e Mídia",
+      "Direito, Relações Internacionais e Políticas Públicas",
+      "Sustentabilidade, Meio Ambiente e Energia",
+      "Análise de dados e pesquisa aplicada",
+    ],
   },
   {
     id: "studyHoursPerDay",
@@ -181,12 +232,13 @@ export const CAREER_QUESTIONS: CareerQuestion[] = [
     options: ["1 semana", "1 mês", "3+ meses"],
   },
   {
-    id: "interestArea",
+    id: "intendsCareerChange",
     stepId: "profile",
     type: "single-choice",
-    title: "Qual área você mais se interessa:",
-    helper: "A área escolhida será a base das recomendações de carreira.",
-    options: ["Tecnologia", "Saúde", "Negócios", "Engenharia", "Artes"],
+    title: "Você pretende mudar de profissão?",
+    helper:
+      "Isso ajuda a decidir se vamos focar em transição de carreira ou em evolução na área atual.",
+    options: ["Sim", "Não"],
   },
   {
     id: "targetProfession",
@@ -222,9 +274,49 @@ export const CAREER_QUESTIONS: CareerQuestion[] = [
     type: "multi-choice",
     title: "Quais países você tem interesse:",
     helper: "Selecione um ou mais países para orientar as recomendações.",
-    options: ["EUA", "Canadá", "Portugal", "Alemanha", "Austrália"],
+    options: [
+      "EUA",
+      "Canadá",
+      "Portugal",
+      "Alemanha",
+      "Austrália",
+      "Reino Unido",
+      "Irlanda",
+      "Holanda",
+      "França",
+      "Espanha",
+      "Nova Zelândia",
+      "Suíça",
+      "China",
+      "Japão",
+      "Coreia do Sul",
+    ],
   },
 ];
+
+export function shouldDisplayQuestion(
+  question: CareerQuestion,
+  values: CareerFormValues
+): boolean {
+  if (
+    question.id === "workInGraduationArea" ||
+    question.id === "currentProfession"
+  ) {
+    return values.currentlyWorking === "Sim";
+  }
+
+  if (question.id === "targetProfession") {
+    return values.intendsCareerChange === "Sim";
+  }
+
+  return true;
+}
+
+export function getVisibleCareerQuestions(
+  values: CareerFormValues
+): CareerQuestion[] {
+  return CAREER_QUESTIONS.filter((question) => shouldDisplayQuestion(question, values));
+}
 
 const arrayFields = new Set<keyof CareerFormValues>(["preferredCountries"]);
 
@@ -245,7 +337,21 @@ export function isQuestionAnswered(
   }
 
   if (typeof value === "number") {
-    return Number.isFinite(value);
+    if (!Number.isFinite(value)) {
+      return false;
+    }
+
+    if (question.type === "number") {
+      if (typeof question.min === "number" && value < question.min) {
+        return false;
+      }
+
+      if (typeof question.max === "number" && value > question.max) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   if (Array.isArray(value)) {
@@ -254,4 +360,3 @@ export function isQuestionAnswered(
 
   return value.trim().length > 0;
 }
-

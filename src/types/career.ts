@@ -1,6 +1,9 @@
 ﻿export interface CareerFormValues {
   age: number | null;
   education: string;
+  currentlyWorking: string;
+  workInGraduationArea: string;
+  currentProfession: string;
   englishLevel: string;
   internationalExperience: string;
   mainGoal: string;
@@ -8,12 +11,11 @@
   personalityPreference: string;
   learningFormat: string;
   personalityInterest: string;
-  workEnvironment: string;
   studyHoursPerDay: string;
   studyAvailability: string;
   mainChallenge: string;
   routineDuration: string;
-  interestArea: string;
+  intendsCareerChange: string;
   targetProfession: string;
   coursePreference: string;
   financialCondition: string;
@@ -30,6 +32,7 @@ export type NonArrayQuestionField = Exclude<CareerQuestionKey, ArrayQuestionFiel
 
 export type CareerQuestionType =
   | "text"
+  | "textarea"
   | "number"
   | "single-choice"
   | "multi-choice";
@@ -47,6 +50,7 @@ export interface CareerQuestion {
   title: string;
   helper: string;
   placeholder?: string;
+  maxLength?: number;
   options?: string[];
   min?: number;
   max?: number;
