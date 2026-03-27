@@ -217,7 +217,7 @@ export function CareerFlow({ initialStarted = false }: CareerFlowProps) {
     return (
       <section className="intro-shell">
         <div className="intro-panel">
-          <p className="intro-tag">AI CAREER SYSTEM</p>
+          <p className="intro-tag">AILA</p>
           <h1>Seu próximo passo para uma carreira internacional</h1>
           <p>
             Descubra carreiras, países e um plano de estudos realista com base

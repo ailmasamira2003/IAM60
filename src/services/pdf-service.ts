@@ -52,7 +52,7 @@ export function exportCareerResultPdf(
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(20);
-  doc.text("AI CAREER SYSTEM - Relatório Completo", 20, 20);
+  doc.text("AILA - Relatório Completo", 20, 20);
 
   let y = 30;
   y = addParagraph(doc, result.summary, y);
@@ -111,5 +111,5 @@ export function exportCareerResultPdf(
     y
   );
 
-  doc.save("relatorio-completo-ai-career-system.pdf");
+  doc.save("relatorio-completo-aila.pdf");
 }

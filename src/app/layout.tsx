@@ -9,7 +9,7 @@ const uiFont = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "AI CAREER SYSTEM",
+  title: "AILA",
   description:
     "Descubra carreiras, países e um plano de estudos realista com base no seu perfil.",
 };

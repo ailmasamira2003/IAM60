@@ -20,7 +20,7 @@ export function StepProgress({
   return (
     <header className="flow-header">
       <div className="flow-meta-row">
-        <span className="flow-badge">AI CAREER SYSTEM</span>
+        <span className="flow-badge">AILA</span>
         <span className="flow-counter">
           Pergunta {currentQuestionIndex + 1} de {totalQuestions}
         </span>
@@ -58,4 +58,3 @@ export function StepProgress({
     </header>
   );
 }
-
