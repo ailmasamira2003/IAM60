@@ -1,5 +1,7 @@
-﻿"use client";
+"use client";
 
+import { useState } from "react";
+import { PlusExperience } from "@/components/career/plus-experience";
 import { exportCareerResultPdf } from "@/services/pdf-service";
 import type { CareerFormValues, CareerResult } from "@/types/career";
 
@@ -26,23 +28,35 @@ function getReadinessLevelLabel(level: number): string {
 
 function getReadinessMessage(level: number): string {
   if (level >= 80) {
-    return "Você já tem uma base sólida para avançar com consistência no plano internacional.";
+    return "Voce ja tem uma base solida para avancar com consistencia no plano internacional.";
   }
 
   if (level >= 60) {
-    return "Seu cenário é positivo, com alguns ajustes pontuais para acelerar resultados.";
+    return "Seu cenario e positivo, com alguns ajustes pontuais para acelerar resultados.";
   }
 
   if (level >= 45) {
-    return "Existe potencial real, mas vale fortalecer rotina, idioma e execução nas próximas semanas.";
+    return "Existe potencial real, mas vale fortalecer rotina, idioma e execucao nas proximas semanas.";
   }
 
-  return "Seu começo pede estrutura e foco em fundamentos antes de acelerar candidaturas.";
+  return "Seu comeco pede estrutura e foco em fundamentos antes de acelerar candidaturas.";
 }
 
 export function ResultScreen({ values, result }: ResultScreenProps) {
+  const [showPlusExperience, setShowPlusExperience] = useState(false);
+
   function handleBuyPdfReport(): void {
     exportCareerResultPdf(values, result);
+  }
+
+  if (showPlusExperience) {
+    return (
+      <PlusExperience
+        values={values}
+        result={result}
+        onBack={() => setShowPlusExperience(false)}
+      />
+    );
   }
 
   return (
@@ -68,7 +82,7 @@ export function ResultScreen({ values, result }: ResultScreenProps) {
         </article>
 
         <article className="result-card readiness-card">
-          <h3>Nível de prontidão</h3>
+          <h3>Nivel de prontidao</h3>
           <strong>{result.readinessLevel}%</strong>
           <div className="readiness-track" aria-hidden>
             <div
@@ -77,16 +91,16 @@ export function ResultScreen({ values, result }: ResultScreenProps) {
             />
           </div>
           <p>
-            Classificação: <strong>{getReadinessLevelLabel(result.readinessLevel)}</strong>
+            Classificacao: <strong>{getReadinessLevelLabel(result.readinessLevel)}</strong>
           </p>
           <p>{getReadinessMessage(result.readinessLevel)}</p>
         </article>
 
         <article className="result-card countries-match-card">
-          <h3>Países que mais combinam com seu estilo</h3>
+          <h3>Paises que mais combinam com seu estilo</h3>
           <p className="result-card-note">
-            Compatibilidade estimada com base no seu perfil e na lista de países
-            escolhida por você.
+            Compatibilidade estimada com base no seu perfil e na lista de paises
+            escolhida por voce.
           </p>
           <ul className="country-match-list">
             {result.countryMatches.map((match) => (
@@ -103,29 +117,33 @@ export function ResultScreen({ values, result }: ResultScreenProps) {
 
         <article className="result-card plus-card">
           <p className="result-kicker">Plano Plus</p>
-          <h3>O que você desbloqueia na assinatura</h3>
+          <h3>O que voce desbloqueia na assinatura</h3>
           <ul>
             <li>Plano detalhado de estudos e de carreira</li>
-            <li>Relatório completo</li>
+            <li>Relatorio completo</li>
             <li>IA personalizada</li>
             <li>Bolsas de estudos e para viagens</li>
           </ul>
-          <p className="plus-price">R$ 49,00/mês</p>
-          <button type="button" className="primary-btn">
+          <p className="plus-price">R$ 49,00/mes</p>
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={() => setShowPlusExperience(true)}
+          >
             Inscreva-se
           </button>
         </article>
 
         <article className="result-card pdf-card">
-          <p className="result-kicker">Relatório Avulso</p>
-          <h3>Relatório completo em PDF</h3>
+          <p className="result-kicker">Relatorio Avulso</p>
+          <h3>Relatorio completo em PDF</h3>
           <p className="result-card-note">
-            Documento completo com análise de perfil, prontidão, compatibilidade de
-            países e respostas do formulário.
+            Documento completo com analise de perfil, prontidao, compatibilidade
+            de paises e respostas do formulario.
           </p>
           <p className="plus-price">R$ 15,90</p>
           <button type="button" className="primary-btn" onClick={handleBuyPdfReport}>
-            Adquira Já!
+            Adquira Ja!
           </button>
         </article>
       </div>
