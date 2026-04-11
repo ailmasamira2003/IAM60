@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PlusExperience } from "@/components/career/plus-experience";
-import { exportCareerResultPdf } from "@/services/pdf-service";
+import { PdfReportCheckout } from "@/components/career/pdf-report-checkout";
 import type { CareerFormValues, CareerResult } from "@/types/career";
 
 interface ResultScreenProps {
@@ -44,10 +44,7 @@ function getReadinessMessage(level: number): string {
 
 export function ResultScreen({ values, result }: ResultScreenProps) {
   const [showPlusExperience, setShowPlusExperience] = useState(false);
-
-  function handleBuyPdfReport(): void {
-    exportCareerResultPdf(values, result);
-  }
+  const [showPdfCheckout, setShowPdfCheckout] = useState(false);
 
   if (showPlusExperience) {
     return (
@@ -55,6 +52,16 @@ export function ResultScreen({ values, result }: ResultScreenProps) {
         values={values}
         result={result}
         onBack={() => setShowPlusExperience(false)}
+      />
+    );
+  }
+
+  if (showPdfCheckout) {
+    return (
+      <PdfReportCheckout
+        values={values}
+        result={result}
+        onBack={() => setShowPdfCheckout(false)}
       />
     );
   }
@@ -142,7 +149,11 @@ export function ResultScreen({ values, result }: ResultScreenProps) {
             de paises e respostas do formulario.
           </p>
           <p className="plus-price">R$ 15,90</p>
-          <button type="button" className="primary-btn" onClick={handleBuyPdfReport}>
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={() => setShowPdfCheckout(true)}
+          >
             Adquira Ja!
           </button>
         </article>

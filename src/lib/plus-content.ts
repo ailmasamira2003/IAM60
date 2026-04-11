@@ -3,6 +3,8 @@ import type { CareerFormValues, CareerResult } from "@/types/career";
 export interface PlusSubscriber {
   fullName: string;
   email: string;
+  cpf?: string;
+  birthDate?: string;
 }
 
 export interface StudyPlanDay {

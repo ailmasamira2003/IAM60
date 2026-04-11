@@ -51,6 +51,16 @@ function formatOptional(value: string): string {
   return trimmed.length > 0 ? trimmed : "Nao informado";
 }
 
+function formatBirthDate(value: string): string {
+  const [year, month, day] = value.split("-");
+
+  if (!year || !month || !day) {
+    return value;
+  }
+
+  return `${day}/${month}/${year}`;
+}
+
 export function exportCareerResultPdf(
   values: CareerFormValues,
   result: CareerResult,
@@ -71,6 +81,16 @@ export function exportCareerResultPdf(
   if (subscriber) {
     y = addParagraph(doc, `Nome: ${subscriber.fullName}`, y);
     y = addParagraph(doc, `E-mail: ${subscriber.email}`, y);
+    if (subscriber.cpf) {
+      y = addParagraph(doc, `CPF: ${subscriber.cpf}`, y);
+    }
+    if (subscriber.birthDate) {
+      y = addParagraph(
+        doc,
+        `Data de nascimento: ${formatBirthDate(subscriber.birthDate)}`,
+        y
+      );
+    }
     y += 2;
   }
 
