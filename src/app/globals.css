@@ -108,7 +108,9 @@ a {
 .intro-shell {
   width: min(1220px, 100% - 2.5rem);
   display: grid;
-  place-items: center;
+  justify-items: center;
+  align-content: center;
+  gap: 1.1rem;
 }
 
 .intro-panel {
@@ -185,6 +187,157 @@ a {
   min-width: 194px;
   padding: 0.84rem 1.95rem;
   font-size: 1rem;
+}
+
+.testimonials-shell {
+  position: relative;
+  width: 100%;
+  padding: clamp(1rem, 2.4vw, 1.45rem);
+  border-radius: 30px;
+  border: 1px solid rgba(147, 51, 234, 0.18);
+  background:
+    radial-gradient(circle at 12% 12%, rgba(108, 43, 217, 0.18), transparent 28%),
+    radial-gradient(circle at 88% 24%, rgba(79, 70, 229, 0.16), transparent 26%),
+    linear-gradient(160deg, rgba(11, 10, 18, 0.9), rgba(21, 16, 36, 0.84));
+  box-shadow:
+    0 24px 70px rgba(8, 7, 18, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.testimonials-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.9rem;
+}
+
+.testimonials-head h2 {
+  margin: 0;
+  font-size: clamp(1.45rem, 2.7vw, 2.2rem);
+  line-height: 1.08;
+  max-width: 18ch;
+}
+
+.testimonials-head p:not(.result-kicker) {
+  margin: 0;
+  color: var(--text-muted);
+  max-width: 64ch;
+}
+
+.testimonials-carousel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.testimonials-arrow {
+  width: auto;
+  min-width: 122px;
+}
+
+.testimonials-viewport {
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.testimonials-track {
+  display: flex;
+  transition: transform 0.45s ease;
+  will-change: transform;
+}
+
+.testimonial-card {
+  flex: 0 0 100%;
+  min-width: 0;
+  border-radius: 24px;
+  border: 1px solid rgba(167, 139, 250, 0.18);
+  background:
+    linear-gradient(145deg, rgba(34, 24, 58, 0.88), rgba(15, 13, 27, 0.94));
+  padding: clamp(1.15rem, 2.4vw, 1.55rem);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 18px 36px rgba(9, 8, 18, 0.34);
+}
+
+.testimonial-rating-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.testimonial-rating-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 139, 250, 0.32);
+  background: rgba(124, 58, 237, 0.14);
+  color: #e9d5ff;
+  padding: 0.34rem 0.68rem;
+  font-size: 0.79rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.testimonial-rating-row strong {
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.testimonial-card h3 {
+  margin: 0;
+  font-size: clamp(1.25rem, 2.4vw, 1.8rem);
+  line-height: 1.12;
+  max-width: 24ch;
+}
+
+.testimonial-card p {
+  margin: 0.95rem 0 0;
+  color: #d8d3ea;
+  font-size: 1rem;
+  line-height: 1.65;
+  max-width: 72ch;
+}
+
+.testimonial-footer {
+  margin-top: 1.15rem;
+  padding-top: 0.95rem;
+  border-top: 1px solid rgba(167, 139, 250, 0.16);
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  color: #cabff1;
+  font-size: 0.92rem;
+}
+
+.testimonials-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-top: 0.95rem;
+}
+
+.testimonial-dot {
+  width: 0.8rem;
+  height: 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  background: rgba(167, 139, 250, 0.14);
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.testimonial-dot:hover {
+  transform: scale(1.06);
+}
+
+.testimonial-dot-active {
+  border-color: rgba(167, 139, 250, 0.76);
+  background: linear-gradient(135deg, #9333ea, #4f46e5);
 }
 
 .flow-shell {
@@ -1198,6 +1351,14 @@ a {
     font-size: clamp(1rem, 2.5vw, 1.1rem);
   }
 
+  .testimonials-carousel {
+    grid-template-columns: 1fr;
+  }
+
+  .testimonials-arrow {
+    justify-self: center;
+  }
+
   .plus-access-grid,
   .plus-hero,
   .plus-chat-layout,
@@ -1251,6 +1412,26 @@ a {
     font-size: 0.96rem;
   }
 
+  .testimonials-shell {
+    padding: 0.95rem;
+    border-radius: 24px;
+  }
+
+  .testimonials-head h2 {
+    max-width: none;
+  }
+
+  .testimonial-card {
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .testimonial-rating-row,
+  .testimonial-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .flow-header,
   .question-card,
   .result-header,
@@ -1294,6 +1475,11 @@ a {
 
   .plus-chat-bubble {
     max-width: 100%;
+  }
+
+  .testimonials-arrow {
+    width: auto;
+    min-width: 144px;
   }
 
   .study-map {

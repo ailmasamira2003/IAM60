@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { CareerFlow } from "@/components/career/career-flow";
+import { TestimonialsCarousel } from "@/components/testimonials-carousel";
 
 export default function HomePage() {
   const [started, setStarted] = useState(false);
@@ -24,6 +25,8 @@ export default function HomePage() {
             Iniciar diagnóstico
           </button>
         </div>
+
+        <TestimonialsCarousel />
       </section>
     );
   }
