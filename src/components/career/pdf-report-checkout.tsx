@@ -23,7 +23,25 @@ function hasFullName(value: string): boolean {
 }
 
 function sanitizeCpf(value: string): string {
-  return value.replace(/\D/g, "");
+  return value.replace(/\D/g, "").slice(0, 11);
+}
+
+function formatCpf(value: string): string {
+  const digits = sanitizeCpf(value);
+
+  if (digits.length <= 3) {
+    return digits;
+  }
+
+  if (digits.length <= 6) {
+    return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  }
+
+  if (digits.length <= 9) {
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  }
+
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
 }
 
 function isValidCpf(value: string): boolean {
@@ -87,6 +105,10 @@ export function PdfReportCheckout({
   const [birthDate, setBirthDate] = useState("");
   const [formError, setFormError] = useState("");
   const [downloadStarted, setDownloadStarted] = useState(false);
+
+  function handleCpfChange(value: string): void {
+    setCpf(formatCpf(value));
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -206,10 +228,11 @@ export function PdfReportCheckout({
                 type="text"
                 inputMode="numeric"
                 className="text-field"
-                placeholder="00000000000"
+                placeholder="000.000.000-00"
                 value={cpf}
-                onChange={(event) => setCpf(event.target.value)}
+                onChange={(event) => handleCpfChange(event.target.value)}
                 autoComplete="off"
+                maxLength={14}
               />
             </label>
 
