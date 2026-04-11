@@ -796,6 +796,12 @@ a {
   font-size: 0.92rem;
 }
 
+.plus-inline-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
 .plus-access-actions {
   display: flex;
   gap: 0.65rem;
@@ -816,8 +822,9 @@ a {
 
 .plus-hero-meta {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.7rem;
+  align-content: start;
 }
 
 .plus-hero-meta-card {
@@ -825,6 +832,23 @@ a {
   display: flex;
   flex-direction: column;
   gap: 0.42rem;
+  min-width: 0;
+}
+
+.plus-hero-meta-card-email {
+  grid-column: 1 / -1;
+  width: fit-content;
+  max-width: 100%;
+  min-width: min(100%, 320px);
+  padding-right: 1.35rem;
+}
+
+.plus-hero-meta-card-email strong {
+  overflow-wrap: anywhere;
+}
+
+.plus-hero-meta-card-compact {
+  min-height: 100%;
 }
 
 .plus-hero-meta-card span,
@@ -1186,7 +1210,7 @@ a {
   }
 
   .plus-hero-meta {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1252,6 +1276,7 @@ a {
   }
 
   .plus-access-points,
+  .plus-inline-fields,
   .plus-metric-grid,
   .plus-skills-grid,
   .plus-hero-meta {

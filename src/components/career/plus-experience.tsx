@@ -322,15 +322,15 @@ export function PlusExperience({
         </div>
 
         <div className="plus-hero-meta">
-          <div className="plus-hero-meta-card">
+          <div className="plus-hero-meta-card plus-hero-meta-card-email">
             <span>E-mail</span>
             <strong>{subscriber.email}</strong>
           </div>
-          <div className="plus-hero-meta-card">
+          <div className="plus-hero-meta-card plus-hero-meta-card-compact">
             <span>Pais ancora</span>
             <strong>{leadCountry}</strong>
           </div>
-          <div className="plus-hero-meta-card">
+          <div className="plus-hero-meta-card plus-hero-meta-card-compact">
             <span>Prontidao atual</span>
             <strong>{result.readinessLevel}%</strong>
           </div>
